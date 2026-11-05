@@ -12,7 +12,10 @@ import {
   Moon,
   Sun,
   Lock,
+  ArrowRight,
+  Gauge,
   Smartphone,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { PresetMode } from '@/compressor/types';
 import { formatBytes } from '@/compressor/format';
@@ -40,7 +43,6 @@ export function CompressorApp({
   const [isProcessingAll, setIsProcessingAll] = useState(false);
   const [isDark, setIsDark] = useState(false);
 
-  // Toggle Dark Mode
   const toggleTheme = () => {
     setIsDark(!isDark);
     if (!isDark) {
@@ -50,7 +52,6 @@ export function CompressorApp({
     }
   };
 
-  // Web Worker Callbacks
   const handleWorkerProgress = useCallback((id: string, progress: number, stage: string) => {
     setFiles((prev) =>
       prev.map((f) => (f.id === id ? { ...f, progress, stage } : f))
@@ -108,7 +109,6 @@ export function CompressorApp({
     onError: handleWorkerError,
   });
 
-  // Adding Files
   const handleFilesSelected = (newFiles: File[]) => {
     const entries: FileEntry[] = newFiles.map((f) => ({
       id: 'pdf_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now(),
@@ -118,10 +118,9 @@ export function CompressorApp({
       status: 'pending',
       progress: 0,
     }));
-    setFiles((prev) => [...prev, ...entries].slice(0, 10)); // max 10
+    setFiles((prev) => [...prev, ...entries].slice(0, 10));
   };
 
-  // Compress single
   const handleCompressSingle = (id: string) => {
     const target = files.find((f) => f.id === id);
     if (!target || target.status === 'compressing') return;
@@ -133,7 +132,6 @@ export function CompressorApp({
     compressPdfInWorker(id, target.file, selectedPreset, targetSizeKb);
   };
 
-  // 1-Click Compress All
   const handleCompressAll = async () => {
     if (isProcessingAll) return;
     setIsProcessingAll(true);
@@ -149,14 +147,12 @@ export function CompressorApp({
     setIsProcessingAll(false);
   };
 
-  // Download single
   const handleDownloadSingle = (file: FileEntry) => {
     if (!file.compressedBlob) return;
     const base = file.name.replace(/\.pdf$/i, '');
     downloadBlob(file.compressedBlob, `${base}-compressed.pdf`);
   };
 
-  // Download All as ZIP (fflate)
   const handleDownloadAllZip = async () => {
     const completed = files.filter((f) => f.status === 'completed' && f.compressedBlob);
     if (completed.length === 0) return;
@@ -174,7 +170,7 @@ export function CompressorApp({
     }
 
     const zipBlob = createZipBundle(zipList);
-    downloadBlob(zipBlob, `shrinkfast-bundle-${Date.now()}.zip`);
+    downloadBlob(zipBlob, `shrinkfast-compressed-${Date.now()}.zip`);
   };
 
   const handleRemoveSingle = (id: string) => {
@@ -185,7 +181,6 @@ export function CompressorApp({
     setFiles([]);
   };
 
-  // Aggregate stats
   const completedItems = files.filter((f) => f.status === 'completed' && f.compressedSize);
   const totalOriginal = completedItems.reduce((acc, f) => acc + f.size, 0);
   const totalCompressed = completedItems.reduce((acc, f) => acc + (f.compressedSize || f.size), 0);
@@ -194,80 +189,79 @@ export function CompressorApp({
   const pendingCount = files.filter((f) => f.status === 'pending').length;
 
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors">
-      {/* Top Banner: Privacy Promise */}
-      <div className="bg-emerald-600 text-white text-xs sm:text-sm font-semibold py-2 px-4 text-center flex items-center justify-center gap-2 shadow-inner">
-        <Lock className="w-4 h-4 shrink-0" />
-        <span>Your files never leave your device. 100% client-side Web Worker processing.</span>
-      </div>
+    <div className="min-h-screen flex flex-col justify-between bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 selection:bg-blue-600 selection:text-white transition-colors duration-200">
+      {/* Top Banner */}
+      <aside aria-label="Privacy Notice" className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-semibold py-2 px-4 text-center flex items-center justify-center gap-2 shadow-xs">
+        <Lock className="w-3.5 h-3.5 shrink-0" />
+        <span>100% Private Client-Side. Your documents are never uploaded to any server.</span>
+      </aside>
 
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-3">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
-              <Sparkles className="w-5 h-5" />
+      {/* Modern Floating Header */}
+      <header className="sticky top-0 z-40 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 transition-all">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center space-x-2.5 group">
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform">
+              <Sparkles className="w-4 h-4" />
             </div>
-            <div>
-              <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-slate-900 to-blue-700 dark:from-white dark:to-blue-400 bg-clip-text text-transparent">
-                ShrinkFast
-              </span>
-              <span className="hidden sm:inline-block ml-2 text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800">
-                Static & Free
-              </span>
-            </div>
+            <span className="font-extrabold text-lg sm:text-xl tracking-tight bg-gradient-to-r from-slate-900 to-blue-700 dark:from-white dark:to-blue-400 bg-clip-text text-transparent">
+              ShrinkFast
+            </span>
           </Link>
 
-          <div className="flex items-center space-x-3">
+          <nav className="flex items-center space-x-2 sm:space-x-4">
             <button
               onClick={toggleTheme}
-              title="Toggle Dark Mode"
-              className="p-2 rounded-xl text-slate-500 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+              aria-label="Toggle Dark Mode"
+              className="p-2 rounded-xl text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition"
             >
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
 
             <Link
               href="/privacy/"
-              className="text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition"
+              className="text-xs sm:text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition"
             >
               Privacy
             </Link>
             <Link
               href="/about/"
-              className="text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition"
+              className="text-xs sm:text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition"
             >
               About
             </Link>
-          </div>
+          </nav>
         </div>
       </header>
 
-      {/* Main Body */}
-      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
-        {/* Hero */}
-        <div className="text-center space-y-3">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-slate-900 dark:text-white">
+      {/* Hero & Workspace */}
+      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-7">
+        {/* Hero Section */}
+        <div className="text-center space-y-2.5 max-w-xl mx-auto">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 text-xs font-semibold border border-blue-200/60 dark:border-blue-900/60 mb-1">
+            <Gauge className="w-3.5 h-3.5" /> High Speed In-Browser Compression
+          </div>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-slate-900 dark:text-white leading-tight">
             {pageTitle || (
               <>
-                Compress PDF Free Online <br />
+                Compress PDF Files <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-300">
-                  100% In Your Browser
+                  Easier In One Click
                 </span>
               </>
             )}
           </h1>
-          <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-xl mx-auto">
+          <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base font-normal">
             {pageSubtitle ||
-              'No uploads. No servers. Zero wait times. Compress PDF documents safely using multi-threaded Web Workers.'}
+              'Lightweight, fast, and completely private. Shrink heavy PDFs without quality loss right on your device.'}
           </p>
         </div>
 
-        {/* Preset Selector */}
+        {/* Compression Preset Selector */}
         <div className="space-y-2">
-          <label className="block text-center text-xs font-bold text-slate-500 uppercase tracking-wider">
-            Choose Compression Level
-          </label>
+          <div className="flex items-center justify-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            <SlidersHorizontal className="w-3.5 h-3.5" />
+            <span>Select Compression Profile</span>
+          </div>
           <PresetSelector
             selectedPreset={selectedPreset}
             onSelectPreset={setSelectedPreset}
@@ -281,17 +275,17 @@ export function CompressorApp({
           disabled={files.length >= 10 || isProcessingAll}
         />
 
-        {/* Batch Action Toolbar */}
+        {/* Action Bar when files are staged */}
         {files.length > 0 && (
-          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3 w-full md:w-auto">
-              <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 font-bold text-xs flex items-center justify-center">
+          <div className="bg-white/95 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xs max-w-2xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <div className="h-8 w-8 rounded-full bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 font-bold text-xs flex items-center justify-center border border-blue-200/60 dark:border-blue-800">
                 {files.length}
               </div>
               <div>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                  {files.length} {files.length === 1 ? 'file' : 'files'} in queue
-                </h3>
+                <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                  {files.length} {files.length === 1 ? 'file' : 'files'} selected
+                </p>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
                   {completedItems.length} completed • {pendingCount} pending
                 </p>
@@ -299,24 +293,24 @@ export function CompressorApp({
             </div>
 
             {completedItems.length > 0 && (
-              <div className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900 px-3.5 py-1.5 rounded-xl text-emerald-800 dark:text-emerald-300 text-xs sm:text-sm font-semibold">
+              <div className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-900 px-3 py-1.5 rounded-xl text-emerald-800 dark:text-emerald-300 text-xs font-semibold">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Total Saved: </span>
+                <span>Saved: </span>
                 <span className="font-bold">{formatBytes(totalSaved)}</span>
                 <span className="text-emerald-600 dark:text-emerald-400">(-{overallReduction}%)</span>
               </div>
             )}
 
-            <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+            <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
               {pendingCount > 0 && (
                 <button
                   type="button"
                   onClick={handleCompressAll}
                   disabled={isProcessingAll}
-                  className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow-md shadow-blue-500/20 transition active:scale-95 disabled:opacity-50"
+                  className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow-md shadow-blue-500/20 transition active:scale-95 disabled:opacity-50"
                 >
                   <Zap className="w-4 h-4 fill-current" />
-                  <span>1-Click Compress All</span>
+                  <span>1-Click Compress</span>
                 </button>
               )}
 
@@ -324,7 +318,7 @@ export function CompressorApp({
                 <button
                   type="button"
                   onClick={handleDownloadAllZip}
-                  className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white font-medium text-xs sm:text-sm px-4 py-2.5 rounded-xl transition shadow-xs active:scale-95"
+                  className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white font-medium text-xs sm:text-sm px-3.5 py-2.5 rounded-xl transition shadow-xs active:scale-95"
                 >
                   <FolderArchive className="w-4 h-4" />
                   <span>ZIP All</span>
@@ -334,7 +328,7 @@ export function CompressorApp({
               <button
                 type="button"
                 onClick={handleClearAll}
-                title="Clear queue"
+                title="Clear all"
                 className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-500 hover:bg-red-50 dark:hover:bg-red-950 hover:text-red-600 transition"
               >
                 <Trash2 className="w-4 h-4" />
@@ -343,7 +337,7 @@ export function CompressorApp({
           </div>
         )}
 
-        {/* Files Queue List */}
+        {/* Files Queue */}
         <FileList
           files={files}
           onCompressSingle={handleCompressSingle}
@@ -351,54 +345,51 @@ export function CompressorApp({
           onDownloadSingle={handleDownloadSingle}
         />
 
-        {/* Quick Links for Target-size Pages */}
-        <section className="pt-8 border-t border-slate-200/80 dark:border-slate-800">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 text-center mb-4">
-            Popular Target Size Tools
-          </h2>
+        {/* Informational SEO Target Size Cards */}
+        <section className="pt-8 border-t border-slate-200/80 dark:border-slate-800/80 max-w-2xl mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <Link
               href="/compress-pdf-to-100kb/"
-              className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500 transition shadow-xs text-center space-y-1 group"
+              className="p-4 rounded-2xl bg-white dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500 transition shadow-xs text-center space-y-1 group"
             >
-              <div className="font-bold text-sm text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                Compress PDF to 100KB
+              <div className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                To 100KB Target
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Target small file size for portal submissions
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                For portal & form limits
               </p>
             </Link>
 
             <Link
               href="/compress-pdf-to-1mb/"
-              className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500 transition shadow-xs text-center space-y-1 group"
+              className="p-4 rounded-2xl bg-white dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500 transition shadow-xs text-center space-y-1 group"
             >
-              <div className="font-bold text-sm text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                Compress PDF to 1MB
+              <div className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                To 1MB Target
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Optimized for government and job forms
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                Standard job application size
               </p>
             </Link>
 
             <Link
               href="/compress-pdf-for-email/"
-              className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500 transition shadow-xs text-center space-y-1 group"
+              className="p-4 rounded-2xl bg-white dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500 transition shadow-xs text-center space-y-1 group"
             >
-              <div className="font-bold text-sm text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                Compress PDF for Email
+              <div className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                For Email Attachments
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Fits easily within 25MB attachment limits
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                Fits 20MB & 25MB mailboxes
               </p>
             </Link>
           </div>
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 py-6 text-xs text-slate-500 dark:text-slate-400">
-        <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+      {/* Clean Modern Footer */}
+      <footer className="bg-white/80 dark:bg-slate-950/80 border-t border-slate-200/80 dark:border-slate-800/80 py-6 text-xs text-slate-500 dark:text-slate-400">
+        <div className="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p>© 2026 ShrinkFast • 100% Client-Side PDF Compressor</p>
           <div className="flex items-center space-x-4">
             <Link href="/privacy/" className="hover:underline">
@@ -408,11 +399,10 @@ export function CompressorApp({
               About
             </Link>
             <span>•</span>
-            <span>Hosted on Cloudflare Pages</span>
+            <span>Cloudflare Pages</span>
           </div>
         </div>
       </footer>
     </div>
   );
 }
-
