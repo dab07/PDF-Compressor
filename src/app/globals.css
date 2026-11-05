@@ -1,4 +1,6 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
   --bg: #f8fafc;
@@ -25,7 +27,6 @@ body {
   min-height: 100dvh;
 }
 
-/* Smooth color-mode transitions only on colours */
 *,
 *::before,
 *::after {
