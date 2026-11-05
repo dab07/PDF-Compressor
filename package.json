@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "clean": "rimraf .next",
+    "prebuild": "node -e \"try{fs.rmSync('.next',{recursive:true,force:true})}catch(e){}\"",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
