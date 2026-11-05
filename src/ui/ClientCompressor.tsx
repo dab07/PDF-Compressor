@@ -33,3 +33,4 @@ interface ClientCompressorProps {
 export function ClientCompressor(props: ClientCompressorProps) {
   return <CompressorApp {...props} />;
 }
+
