@@ -124,3 +124,4 @@ export function Dropzone({ onFilesSelected, disabled }: DropzoneProps) {
     </div>
   );
 }
+

@@ -81,3 +81,4 @@ export function useCompressorWorker({
 
   return { compressPdfInWorker };
 }
+
