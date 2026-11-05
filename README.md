@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ShrinkFast 📄⚡
+### 100% Client-Side PDF Compressor
 
-## Getting Started
+A lightning-fast, zero-cloud PDF compression web application built with **Next.js 15+ (App Router)**, **TypeScript (strict)**, and **Tailwind CSS**. 
 
-First, run the development server:
+**Your files never leave your device.** All compression happens entirely in the browser using multi-threaded Web Workers, `pdf-lib`, and `fflate`.
+
+---
+
+## Features
+- **100% Client-Side & Private**: No backend, no servers, no database, no uploads.
+- **Dedicated Web Worker**: Heavy stream deflating runs on background threads so the UI never freezes or stutters.
+- **Compression Presets**:
+  - **Low**: Max 300 DPI, high quality (0.85)
+  - **Medium (Recommended)**: 150 DPI, balanced (0.70)
+  - **High**: 96 DPI, maximum size reduction (0.50)
+  - **Extreme**: Full page rasterization
+- **Smart Anti-Bloat Protection**: If the output is larger than or equal to the original, the app returns the original file and shows **"Already optimized"**.
+- **Security & Limits**:
+  - Validates raw `%PDF` magic bytes (rejects fake files)
+  - Desktop limit: 100 MB | Mobile limit: 30 MB
+  - Graceful detection of password-protected / encrypted PDFs
+- **Batch Processing**: Upload up to 10 files at once with individual progress indicators.
+- **ZIP Download**: Download single files or bundle everything into a clean ZIP using `fflate` (AGPL-free).
+- **Target-Size Landing Pages**:
+  - `/compress-pdf-to-100kb/`
+  - `/compress-pdf-to-1mb/`
+  - `/compress-pdf-for-email/`
+- **Mobile-First & Dark Mode**: Responsive touch targets and one-click dark mode toggle.
+- **SEO Ready**: `sitemap.xml`, `robots.txt`, and Open Graph metadata.
+
+---
+
+## Local Development
 
 ```bash
+# 1. Install dependencies
+npm install
+
+# 2. Run unit tests
+npm test # or npx vitest run
+
+# 3. Start local development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Free Cloudflare Pages Deployment
 
-## Learn More
+This project uses Next.js Static HTML Export (`output: 'export'`) in `next.config.ts`, generating a pure static build in the `out/` directory.
 
-To learn more about Next.js, take a look at the following resources:
+### Deploying via Git (Recommended)
+1. Push this repository to your GitHub account (`git push origin main`).
+2. Go to the [Cloudflare Dashboard](https://dash.cloudflare.com/) → **Workers & Pages** → **Create application** → **Pages** → **Connect to Git**.
+3. Select the repository `dab07/PDF-Compressor`.
+4. Configure Build Settings:
+   - **Framework preset**: `Next.js (Static HTML Export)`
+   - **Build command**: `npm run build`
+   - **Build output directory**: `out`
+5. Click **Save and Deploy**. Your website will be live globally on Cloudflare's edge network for free with HTTPS.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Automated Tests
+Unit tests verify magic bytes parsing, encrypted PDF handling, object streams optimization, and anti-bloat logic:
+```bash
+npx vitest run
+```
