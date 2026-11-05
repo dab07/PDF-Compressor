@@ -1,19 +1,18 @@
-import { CompressorApp } from '@/ui/CompressorApp';
+import type { Metadata } from 'next';
+import { ClientCompressor } from '@/ui/ClientCompressor';
 
-export const metadata = {
-  title: 'Compress PDF to 1MB Online – Instant & Private',
-  description:
-    'Reduce PDF file size to under 1MB quickly and privately. Meets standard job board and government upload limits.',
+export const metadata: Metadata = {
+  title: 'Compress PDF to 1MB Online – Free & Private | ShrinkFast',
+  description: 'Reduce your PDF to under 1MB instantly in the browser. No uploads, no server. Perfect for job applications and government forms.',
 };
 
 export default function CompressTo1MbPage() {
   return (
-    <CompressorApp
+    <ClientCompressor
       initialPreset="medium"
       targetSizeKb={1024}
       pageTitle="Compress PDF to 1MB"
-      pageSubtitle="Compress documents to under 1MB with clean vector clarity and balanced downsampling."
+      pageSubtitle="Target 1MB or less. Great for job boards, HR portals, and government uploads."
     />
   );
 }
-

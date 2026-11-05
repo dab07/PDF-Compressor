@@ -1,19 +1,18 @@
-import { CompressorApp } from '@/ui/CompressorApp';
+import type { Metadata } from 'next';
+import { ClientCompressor } from '@/ui/ClientCompressor';
 
-export const metadata = {
-  title: 'Compress PDF to 100KB Online – Free & 100% Client-Side',
-  description:
-    'Reduce PDF file size to 100KB or less right in your browser. Perfect for application portals and document uploads.',
+export const metadata: Metadata = {
+  title: 'Compress PDF to 100KB Online – Free & Private | ShrinkFast',
+  description: 'Reduce PDF file size to 100KB or less right in your browser. Perfect for portals, visa applications, and document uploads.',
 };
 
 export default function CompressTo100KbPage() {
   return (
-    <CompressorApp
+    <ClientCompressor
       initialPreset="high"
       targetSizeKb={100}
       pageTitle="Compress PDF to 100KB"
-      pageSubtitle="Target compact document size under 100KB without uploading your files to any external server."
+      pageSubtitle="Shrink your PDF to under 100KB without uploading it to any server."
     />
   );
 }
-

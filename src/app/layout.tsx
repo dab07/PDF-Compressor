@@ -1,6 +1,10 @@
-export const metadata = {
-  title: 'ShrinkFast | One-Click PDF & Word Compressor',
-  description: 'Fast, secure, responsive client-side PDF and Word compressor. Compress multiple files simultaneously with zero server uploads.',
+import type { Metadata } from 'next';
+import './globals.css';
+
+export const metadata: Metadata = {
+  title: 'ShrinkFast – Free PDF Compressor Online (100% Private)',
+  description:
+    'Compress PDF files directly in your browser with zero uploads. Fast, private, and free. Works on mobile, tablet, and desktop.',
 };
 
 export default function RootLayout({
@@ -9,11 +13,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
-      <body className="min-h-screen bg-slate-50 text-slate-900 antialiased selection:bg-blue-500 selection:text-white">
+      <body className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased">
         {children}
       </body>
     </html>
